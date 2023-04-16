@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { env } from "~/env.mjs";
+import { clerkClient } from "@clerk/nextjs/server";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { type PagingTrackObject } from "spotify.api";
+import { prisma } from "~/server/db";
 
 export const spotifyRouter = createTRPCRouter({
   loginWithCode: publicProcedure
@@ -54,5 +57,39 @@ export const spotifyRouter = createTRPCRouter({
       };
       console.log({ result });
       return result;
+    }),
+
+  myTopTracks: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      const { userId } = input;
+
+      const [result] = await clerkClient.users.getUserOauthAccessToken(
+        userId,
+        "oauth_spotify"
+      );
+
+      if (!result) return;
+      const { token } = result;
+
+      const fetchResult = (await (
+        await fetch(
+          "https://api.spotify.com/v1/me/top/tracks?time_range=short_term",
+          {
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          }
+        )
+      ).json()) as PagingTrackObject;
+
+      console.log({ token });
+      //   const { items } = fetchResult;
+
+      //   console.log({ items });
     }),
 });

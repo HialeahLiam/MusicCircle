@@ -8,6 +8,7 @@ const server = z.object({
   DATABASE_URL: z.string().url(),
   NODE_ENV: z.enum(["development", "test", "production"]),
   SPOTIFY_CLIENT_SECRET: z.string(),
+  CLERK_SECRET_KEY: z.string(),
 });
 
 /**
@@ -18,6 +19,7 @@ const client = z.object({
   // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
   NEXT_PUBLIC_SPOTIFY_CLIENT_ID: z.string(),
   NEXT_PUBLIC_SPOTIFY_REDIRECT_URI: z.string().url(),
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string(),
 });
 
 /**
@@ -33,6 +35,9 @@ const processEnv = {
   SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET,
   NEXT_PUBLIC_SPOTIFY_REDIRECT_URI:
     process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI,
+  CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 };
 
