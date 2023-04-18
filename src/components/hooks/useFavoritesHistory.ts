@@ -51,6 +51,7 @@ function useFavoritesHistory() {
   return {
     setTrackIds,
     tracks,
+    trackIds,
   };
 }
 
