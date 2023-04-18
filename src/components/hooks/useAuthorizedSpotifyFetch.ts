@@ -8,17 +8,21 @@ function useAuthorizedSpotifyFetch(initialUrl?: string, body?: string) {
   const { user, isLoaded } = useUser();
 
   /** prevents useQuery from fetching while Clerk is updating Spotify access token */
-  const [tokenRefreshing, setTokenRefreshing] = useState(false);
   const [url, setUrl] = useState(initialUrl);
 
   const refreshMutation = api.user.refreshSpotifyToken.useMutation();
-  const spotifyToken = user?.publicMetadata.spotifyToken;
 
-  useEffect(() => {
-    setTokenRefreshing(false);
-  }, [spotifyToken]);
+  /** we retrieve the refresh token from our mutation instead of useUser hook because
+   * for some reason the user object isn't reflecting the updated token
+   */
+  const spotifyToken =
+    refreshMutation.data?.token || user?.publicMetadata.spotifyToken;
+
+  console.log({ isLoaded });
+  console.log({ spotifyToken }, { url }, { user });
 
   const fetcher = useCallback(async () => {
+    console.log(`query fetched with url ${url} and token ${spotifyToken}`);
     const innerFetcher = () =>
       fetch(url as string, {
         headers: {
@@ -34,7 +38,6 @@ function useAuthorizedSpotifyFetch(initialUrl?: string, body?: string) {
       );
 
       refreshMutation.mutate({ userId: user?.id as string });
-      setTokenRefreshing(true);
       return [];
     }
     const { tracks } = (await response.json()) as {
@@ -46,8 +49,10 @@ function useAuthorizedSpotifyFetch(initialUrl?: string, body?: string) {
   const query = useQuery({
     queryKey: [url, body, spotifyToken],
     queryFn: () => fetcher(),
-    enabled: !!spotifyToken && !!url && !!user && !tokenRefreshing,
+    enabled: !!spotifyToken && !!url && !!user,
   });
+
+  console.log({ query });
 
   if (isLoaded && !spotifyToken) {
     console.log(

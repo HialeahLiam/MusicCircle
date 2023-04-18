@@ -143,7 +143,9 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const { userId } = input;
 
-      await refreshSpotifyToken(userId);
+      const token = await refreshSpotifyToken(userId);
+
+      return { token };
 
       // we make it public instead of unsafe because we only expect to set the token in the backend
     }),
