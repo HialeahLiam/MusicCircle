@@ -67,7 +67,7 @@ function PersonalFavoritesView() {
 
   console.log({ favsQueries });
   return (
-    <div className="mx-auto  flex flex-wrap justify-center gap-6 ">
+    <div className="mx-auto grid gap-x-6 gap-y-4 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
       {/* <InfiniteScroll
         dataLength={favorites.length}
         hasMore={!!favoritesQuery.hasNextPage}
@@ -86,7 +86,7 @@ function PersonalFavoritesView() {
               key={`${fav.trackId}${
                 user?.id as string
               }${fav.dateRecorded.toUTCString()}`}
-              className="mb-4 flex w-36 flex-col items-stretch gap-2 overflow-hidden rounded-xl bg-slate-900"
+              className="mb-4 flex  basis-36 flex-col items-stretch gap-2 overflow-hidden rounded-xl bg-slate-900"
             >
               <div className="relative mb-2 aspect-square  overflow-hidden ">
                 <Image
