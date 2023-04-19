@@ -11,7 +11,6 @@ import useFavoritesHistory from "~/components/hooks/useFavoritesHistory";
 import { api } from "~/utils/api";
 
 function Home() {
-  console.log("HOME");
   const router = useRouter();
   const { userId, isLoaded } = useAuth();
 
