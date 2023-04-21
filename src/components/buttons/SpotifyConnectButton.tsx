@@ -1,4 +1,4 @@
-import { useSignIn } from "@clerk/nextjs";
+import { useSignIn, useSignUp } from "@clerk/nextjs";
 import { useRouter } from "next/router";
 import React from "react";
 import { env } from "~/env.mjs";
@@ -6,6 +6,7 @@ import { env } from "~/env.mjs";
 function SpotifyConnectButton() {
   const router = useRouter();
   const { signIn, isLoaded } = useSignIn();
+  const { signUp } = useSignUp();
 
   const _authorizeSpotify = () => {
     const urlParams = new URLSearchParams({
@@ -20,7 +21,7 @@ function SpotifyConnectButton() {
   };
 
   const _connectSpotify = async () => {
-    return signIn
+    return signUp
       ?.authenticateWithRedirect({
         strategy: "oauth_spotify",
         redirectUrl: "/sso-callback",
@@ -31,7 +32,7 @@ function SpotifyConnectButton() {
 
   return (
     <button
-      onClick={() => _connectSpotify()}
+      onClick={() => void _connectSpotify()}
       className=" rounded-full bg-green-500 px-6 py-3 text-white hover:bg-green-400"
     >
       Connect to Spotify

@@ -13,15 +13,15 @@ function Onboarding() {
   const { userId, isLoaded } = useAuth();
   const router = useRouter();
 
-  const tokenQuery = api.user.refreshSpotifyToken.useMutation();
+  const signInMutation = api.user.processSignIn.useMutation();
 
   useEffect(() => {
-    if (!!userId) tokenQuery.mutate({ userId });
+    if (!!userId) signInMutation.mutate({ userId });
   }, [userId]);
 
-  if (isLoaded && userId && tokenQuery.isSuccess) {
+  if (isLoaded && userId && signInMutation.isSuccess) {
     router.replace(`/${userId}/home`).catch((err) => console.log(err));
-  } else if ((isLoaded && !userId) || tokenQuery.isError) {
+  } else if ((isLoaded && !userId) || signInMutation.isError) {
     router.replace(`/`).catch((err) => console.log(err));
   }
   /** Not use this component for now. Only for routing after sign in. */

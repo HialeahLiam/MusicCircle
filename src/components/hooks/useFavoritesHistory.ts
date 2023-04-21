@@ -32,8 +32,6 @@ function useFavoritesHistory() {
     return batches;
   }, [favoritesHistoryItems]);
 
-  console.log({ trackIdBatches });
-
   const spotifyToken: string =
     refreshMutation.data?.token ||
     (user?.publicMetadata.spotifyToken as string | undefined) ||

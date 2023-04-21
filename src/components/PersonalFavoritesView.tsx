@@ -18,19 +18,13 @@ const TRACK_LIMIT = 10;
 function PersonalFavoritesView() {
   const { setFavoritesHistoryItems, favsQueries } = useFavoritesHistory();
   const { user } = useUser();
-
-  // console.log("\n\n");
-  // console.log(favsQuery.data);
-  // console.log("isLoading", favsQuery.isLoading);
-  // console.log("isError", favsQuery.isError);
-  // console.log("isSuccess", favsQuery.isSuccess);
-  // console.log("\n\n");
   // temp 🚨
   const tracks = [];
 
+  console.log(user?.publicMetadata.spotifyToken);
+
   const favoritesInfiniteQuery = api.user.favoritesHistory.useInfiniteQuery(
     {
-      spotifyToken: user?.publicMetadata.spotifyToken as string,
       userId: user?.id as string,
       limit: TRACK_LIMIT,
     },
@@ -65,7 +59,6 @@ function PersonalFavoritesView() {
     setFavoritesHistoryItems(favoritesEntries);
   }, [favoritesInfiniteQuery.data?.pages]);
 
-  console.log({ favsQueries });
   return (
     <div className="mx-auto grid gap-x-6 gap-y-4 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
       {/* <InfiniteScroll
@@ -108,7 +101,7 @@ function PersonalFavoritesView() {
         )
       )}
       {/* </InfiniteScroll> */}
-      <button onClick={() => favoritesInfiniteQuery.fetchNextPage()}>
+      <button onClick={() => void favoritesInfiniteQuery.fetchNextPage()}>
         more
       </button>
 

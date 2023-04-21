@@ -22,7 +22,7 @@ function useAuthorizedSpotifyFetch(initialUrl?: string, body?: string) {
   console.log({ spotifyToken }, { url }, { user });
 
   const fetcher = useCallback(async () => {
-    console.log(`query fetched with url ${url} and token ${spotifyToken}`);
+    // console.log(`query fetched with url ${url} and token ${spotifyToken}`);
     const innerFetcher = () =>
       fetch(url as string, {
         headers: {

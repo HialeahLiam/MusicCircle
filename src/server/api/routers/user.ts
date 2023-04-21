@@ -67,13 +67,12 @@ export const userRouter = createTRPCRouter({
     .input(
       z.object({
         userId: z.string(),
-        spotifyToken: z.string(),
         cursor: z.number(),
         limit: z.number().default(5),
       })
     )
     .query(async ({ input }) => {
-      const { userId, spotifyToken, cursor, limit } = input;
+      const { userId, cursor, limit } = input;
 
       const favorites = await prisma.favoritesHistory.findMany({
         where: {
@@ -88,20 +87,79 @@ export const userRouter = createTRPCRouter({
 
       console.log(favorites.length, { cursor });
 
-      // if user has no favorites, they are a new user
+      // // if user has no favorites, they are a new user
 
-      if (favorites.length === 0 && cursor === 0) {
+      // if (favorites.length === 0 && cursor === 0) {
+      //   console.log("NEW USER");
+      //   // get top tracks from spotify
+      //   const spotifyResult = (await (
+      //     await fetchSpotifyWithUserToken({
+      //       url: "https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=10",
+      //       token: spotifyToken,
+      //       // token: "234234",
+      //       userId,
+      //     })
+      //   ).json()) as PagingTrackObject;
+
+      //   console.log({ spotifyResult });
+
+      //   if (!spotifyResult.items)
+      //     throw new Error("❎ top track items field was undefined.");
+
+      //   await prisma.favoritesHistory.createMany({
+      //     data: spotifyResult.items.map((track, index) => ({
+      //       trackId: track.id,
+      //       userId,
+      //       rank: index,
+      //     })),
+      //   });
+
+      //   const firstFavorites = await prisma.favoritesHistory.findMany({
+      //     where: {
+      //       userId,
+      //     },
+      //     orderBy: {
+      //       dateRecorded: "desc",
+      //     },
+      //   });
+
+      //   return { tracks: firstFavorites, isNewUser: true };
+      // }
+      return { tracks: favorites, nextCursor: cursor + limit };
+    }),
+
+  processSignIn: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { userId } = input;
+
+      /** In any case, sign in or sign up, refresh token for use */
+      const token = await refreshSpotifyToken(userId);
+
+      /** If user does not have associated favorites history, mark user as new in User object and create initial favorites*/
+      const favorites = await prisma.favoritesHistory.findMany({
+        where: {
+          userId,
+        },
+      });
+
+      if (favorites.length === 0) {
+        console.log("NEW USER");
         // get top tracks from spotify
         const spotifyResult = (await (
           await fetchSpotifyWithUserToken({
             url: "https://api.spotify.com/v1/me/top/tracks?time_range=short_term&limit=10",
-            token: spotifyToken,
+            token,
             // token: "234234",
             userId,
           })
         ).json()) as PagingTrackObject;
 
-        console.log({ spotifyResult });
+        console.log("during sign in: ", { spotifyResult });
 
         if (!spotifyResult.items)
           throw new Error("❎ top track items field was undefined.");
@@ -114,20 +172,13 @@ export const userRouter = createTRPCRouter({
           })),
         });
 
-        const firstFavorites = await prisma.favoritesHistory.findMany({
-          where: {
-            userId,
-          },
-          orderBy: {
-            dateRecorded: "desc",
+        await clerkClient.users.updateUserMetadata(userId, {
+          publicMetadata: {
+            isNewUser: true,
           },
         });
-
-        return { tracks: firstFavorites, isNewUser: true };
       }
-      return { tracks: favorites, nextCursor: cursor + limit };
     }),
-
   /**
    * Procedure doesn't really refresh the token, it just asks Clerk for an up to date one.
    * If it's expired, Clerk automatically refreshes it for us.
